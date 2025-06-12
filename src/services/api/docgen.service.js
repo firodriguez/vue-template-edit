@@ -16,7 +16,9 @@ class DocGenService extends BaseApiService {
         })
 
         // Configuración por defecto para todas las peticiones
-        this.defaultConfig = { token: '1434' }
+        this.defaultConfig = {
+            token: import.meta.env.VITE_DOCGEN_TOKEN
+        }
     }
 
     // ================================
