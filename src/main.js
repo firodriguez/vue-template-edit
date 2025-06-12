@@ -4,7 +4,15 @@ import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify'
 
-// Importar servicios
+// ================================
+// ESTILOS GLOBALES
+// ================================
+// ✅ AGREGAR ESTA LÍNEA - CSS Global Optimizado
+import './assets/styles/global-optimization.css'
+
+// ================================
+// IMPORTAR SERVICIOS
+// ================================
 import apiServices from './services/api/index.js'
 
 const app = createApp(App)
@@ -34,6 +42,7 @@ if (import.meta.env.DEV) {
     // Logs adicionales en desarrollo
     console.log('🚀 App iniciada en modo desarrollo')
     console.log('📡 Servicios disponibles:', Object.keys(apiServices))
+    console.log('🎨 CSS Global optimizado cargado') // ✅ Log adicional
 
     // Hacer servicios accesibles desde consola para debugging
     window.__API_SERVICES__ = apiServices
