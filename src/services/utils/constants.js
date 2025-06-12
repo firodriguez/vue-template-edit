@@ -9,7 +9,7 @@ export const APP_CONSTANTS = {
     RETRY_DELAY: 1000,
 
     // DocGen específico
-    DOCGEN_TOKEN: '1434',
+    DOCGEN_TOKEN: import.meta.env.VITE_DOCGEN_TOKEN,
     SUPPORTED_FORMATS: ['pdf', 'html'],
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
 

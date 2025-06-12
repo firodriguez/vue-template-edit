@@ -49,7 +49,7 @@
                     </template>
 
                     <v-list-item prepend-icon="mdi-file-document-edit" title="Editor de Templates"
-                        value="template-editor" :to="{ name: 'docgen-editor' }" color="primary"
+                        value="temp3late-editor" :to="{ name: 'docgen-editor' }" color="primary"
                         class="pl-12"></v-list-item>
 
                     <v-list-item prepend-icon="mdi-folder-multiple" title="Gestión de Templates"
@@ -145,28 +145,17 @@
             <v-app-bar-title class="font-weight-bold">
                 {{ currentPageTitle }}
             </v-app-bar-title>
-
-            <v-spacer></v-spacer>
-
-            <!-- STATUS CHIP DEL SERVICIO ACTUAL -->
-            <v-tooltip v-if="currentServiceStatus" :text="currentServiceStatus.tooltip" location="bottom">
-                <template v-slot:activator="{ props }">
-                    <v-chip v-bind="props" :color="currentServiceStatus.color" size="small" class="mr-3">
-                        <v-icon left size="small">
-                            {{ currentServiceStatus.icon }}
-                        </v-icon>
-                        {{ currentServiceStatus.text }}
-                    </v-chip>
-                </template>
-            </v-tooltip>
-
             <!-- BREADCRUMBS -->
             <v-breadcrumbs v-if="breadcrumbs.length > 1 && !isMobile" :items="breadcrumbs" class="pa-0"
                 density="compact">
                 <template v-slot:divider>
-                    <v-icon size="small" color="white">mdi-chevron-right</v-icon>
+                    <v-icon size="small" color="b">mdi-chevron-right</v-icon>
                 </template>
             </v-breadcrumbs>
+
+            <v-spacer></v-spacer>
+
+
         </v-app-bar>
 
         <!-- ================================ -->
@@ -251,29 +240,13 @@ export default {
         currentPageColor() {
             const colorMap = {
                 'dashboard': 'primary',
-                'docgen-editor': 'surfrut',
+                'docgen-editor': 'purple',
                 'docgen-manager': 'blue',
                 'docgen-dashboard': 'purple',
                 'settings': 'grey-darken-1',
                 'help': 'orange'
             }
             return colorMap[this.$route.name] || 'primary'
-        },
-
-        currentServiceStatus() {
-            // Mostrar status solo en páginas de servicios específicos
-            if (this.$route.name?.startsWith('docgen')) {
-                const status = this.servicesStatus.docgen
-                return {
-                    color: status === 'online' ? 'success' : 'error',
-                    icon: status === 'online' ? 'mdi-cloud-check' : 'mdi-cloud-off',
-                    text: status === 'online' ? 'DocGen Online' : 'DocGen Offline',
-                    tooltip: status === 'online'
-                        ? 'Servicio DocGen funcionando correctamente'
-                        : 'Servicio DocGen no disponible'
-                }
-            }
-            return null
         },
 
         breadcrumbs() {

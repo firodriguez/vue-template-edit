@@ -14,23 +14,6 @@
                     </p>
                 </div>
             </div>
-
-            <!-- STATUS Y ACCIONES -->
-            <div class="d-flex align-center ga-3">
-                <v-tooltip text="Estado de conexión con generate.surfrut.com" location="bottom">
-                    <template v-slot:activator="{ props }">
-                        <v-chip v-bind="props" :color="connectionStatus ? 'success' : 'error'" size="small">
-                            <v-icon left size="small">
-                                {{ connectionStatus ? 'mdi-cloud-check' : 'mdi-cloud-off' }}
-                            </v-icon>
-                            {{ connectionStatus ? 'Online' : 'Offline' }}
-                        </v-chip>
-                    </template>
-                </v-tooltip>
-
-                <v-btn icon="mdi-refresh" size="small" @click="checkConnection" :loading="loadingConnection"
-                    variant="outlined"></v-btn>
-            </div>
         </div>
 
         <!-- ================================ -->
@@ -56,9 +39,10 @@
                                     <template v-slot:prepend>
                                         <v-icon color="primary">mdi-file-document</v-icon>
                                     </template>
-                                    <v-list-item-title>{{ item.raw.name }}</v-list-item-title>
                                     <v-list-item-subtitle>
-                                        {{ item.raw.formattedSize }} • {{ item.raw.formattedDate }}
+                                        tamaño: {{ item.raw.formattedSize }} •
+                                        <v-icon color="primary">mdi-calendar-range</v-icon>
+                                        fecha: {{ item.raw.formattedDate }}
                                     </v-list-item-subtitle>
                                 </v-list-item>
                             </template>
@@ -101,7 +85,7 @@
                             </v-alert>
 
                             <!-- Scroll container para variables -->
-                            <div style="max-height: 400px; overflow-y: auto;">
+                            <div style="max-height: 350px; overflow-y: auto;">
                                 <!-- Variables simples -->
                                 <div v-for="variable in templateData.normalVariables" :key="variable" class="mb-3">
                                     <v-text-field v-model="formData[variable]" :label="variable" variant="outlined"
@@ -223,7 +207,7 @@
             </v-col>
 
             <!-- PANEL DERECHO: Preview -->
-            <v-col cols="12" lg="8">
+            <v-col cols="2" lg="8">
                 <v-card elevation="2" class="h-100">
                     <!-- Header del Preview -->
                     <v-card-title class="bg-blue text-white d-flex align-center">
@@ -237,7 +221,7 @@
                             <!-- Botón PDF -->
                             <v-btn v-if="shouldShowPDFButton" color="success" size="small" @click="generatePDF"
                                 :loading="loadingPDF" variant="flat">
-                                <v-icon left size="small">mdi-file-pdf</v-icon>
+                                <v-icon left size="small">mdi-file-pdf-box</v-icon>
                                 {{ isShowingExample ? 'PDF Ejemplo' : 'Generar PDF' }}
                             </v-btn>
 
@@ -252,7 +236,7 @@
                             <v-btn-toggle v-model="previewMode" mandatory density="compact">
                                 <v-btn value="rendered" size="small">
                                     <v-icon size="small">mdi-web</v-icon>
-                                    Vista
+                                    Preview
                                 </v-btn>
                                 <v-btn value="html" size="small">
                                     <v-icon size="small">mdi-code-tags</v-icon>

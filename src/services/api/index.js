@@ -1,5 +1,6 @@
 import DocGenService from './docgen.service.js'
 import BaseApiService from './base.service.js'
+import {APP_CONSTANTS} from '../utils/constants.js';
 
 // ================================
 // INSTANCIAS DE SERVICIOS
@@ -39,7 +40,7 @@ export const API_CONFIG = {
         name: 'docgen-service',
         baseURL: 'https://generate.surfrut.com',
         timeout: 15000,
-        defaultToken: '1434'
+        defaultToken: APP_CONSTANTS.DOCGEN_TOKEN
     },
     // Aquí puedes agregar más APIs fácilmente:
     // ANALYTICS: {

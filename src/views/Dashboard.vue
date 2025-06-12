@@ -21,7 +21,7 @@
           <v-card elevation="2" hover class="h-100">
             <v-card-text class="pa-6">
               <div class="d-flex align-center mb-4">
-                <v-avatar color="surfrut" size="48" class="mr-4">
+                <v-avatar color="blue" size="48" class="mr-4">
                   <v-icon color="white" size="24">mdi-file-document-multiple</v-icon>
                 </v-avatar>
                 <div>
@@ -45,7 +45,7 @@
   
               <div class="d-flex flex-column ga-2">
                 <v-btn 
-                  color="surfrut" 
+                  color="blue" 
                   variant="flat" 
                   :to="{ name: 'docgen-editor' }"
                   block
@@ -265,7 +265,7 @@ export default {
                 totalTemplates: 0,
                 totalPDFs: 'N/A',
                 avgResponseTime: 'N/A',
-                serviceUptime: '99.9%'
+                serviceUptime: '98.9%'
             }
         }
     },

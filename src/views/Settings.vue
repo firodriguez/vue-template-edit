@@ -12,7 +12,6 @@
         </div>
 
         <v-alert type="info" variant="tonal" class="mb-6">
-            <v-icon left>mdi-information</v-icon>
             Panel de configuración en desarrollo
         </v-alert>
     </v-container>

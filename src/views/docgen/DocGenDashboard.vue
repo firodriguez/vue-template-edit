@@ -12,7 +12,6 @@
         </div>
 
         <v-alert type="info" variant="tonal" class="mb-6">
-            <v-icon left>mdi-information</v-icon>
             Esta vista será expandida con métricas específicas del servicio DocGen
         </v-alert>
 
