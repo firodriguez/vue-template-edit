@@ -1,3 +1,4 @@
+<!-- src/components/TemplateEditor.vue (Versión de Transición) -->
 <template>
     <v-app>
         <!-- TOOLBAR -->
@@ -52,8 +53,8 @@
                                             </template>
                                             <v-list-item-title>📄 {{ item.raw.name }}</v-list-item-title>
                                             <v-list-item-subtitle>
-                                                📏 {{ formatFileSize(item.raw.size) }} •
-                                                📅 {{ formatDate(item.raw.modified) }} •
+                                                📏 {{ item.raw.formattedSize }} •
+                                                📅 {{ item.raw.formattedDate }} •
                                                 {{ item.raw.hasExample ? '✅ Con datos ejemplo' : '❌ Sin datos ejemplo'
                                                 }}
                                             </v-list-item-subtitle>
@@ -61,7 +62,7 @@
                                     </template>
 
                                     <template v-slot:selection="{ item }">
-                                        <span> {{ item.title }}</span>
+                                        <span>{{ item.title }}</span>
                                     </template>
                                 </v-select>
 
@@ -92,7 +93,7 @@
                             <div v-if="templateData" class="flex-grow-1 variables-container">
                                 <v-card-title class="py-3">
                                     <v-icon left color="orange">mdi-variable</v-icon>
-                                    Variables ({{ templateData.variables?.length || 0 }})
+                                    Variables ({{ templateData.normalVariables?.length || 0 }})
                                 </v-card-title>
 
                                 <v-card-text class="variables-scroll-area">
@@ -102,13 +103,11 @@
                                     </v-alert>
 
                                     <!-- FORMULARIO DINÁMICO -->
-                                    <div v-for="variable in templateData.variables" :key="variable">
+                                    <div v-for="variable in templateData.normalVariables" :key="variable">
                                         <v-text-field v-model="formData[variable]" :label="variable" outlined dense
                                             class="mb-2" @input="generatePreview" clearable>
                                             <template v-slot:prepend-inner>
-                                                <v-icon size="small" color="grey">
-                                                    mdi-code-braces
-                                                </v-icon>
+                                                <v-icon size="small" color="grey">mdi-code-braces</v-icon>
                                             </template>
                                         </v-text-field>
                                     </div>
@@ -117,7 +116,7 @@
                                     <div v-if="hasArrays">
                                         <v-divider class="my-4"></v-divider>
 
-                                        <!-- Por cada array detectado, crear una sección -->
+                                        <!-- Por cada array detectado -->
                                         <div v-for="arrayInfo in templateData.arrayInfo" :key="arrayInfo.name"
                                             class="mb-6">
                                             <v-subheader>
@@ -145,7 +144,7 @@
                                                         </v-btn>
                                                     </div>
 
-                                                    <!-- Campos dinámicos según las variables del array -->
+                                                    <!-- Campos dinámicos según variables del array -->
                                                     <div v-for="variable in arrayInfo.variables" :key="variable">
                                                         <v-text-field v-model="item[variable]" :label="variable"
                                                             density="compact" @input="generatePreview"></v-text-field>
@@ -265,10 +264,15 @@
 </template>
 
 <script>
-import axios from 'axios'
+// ================================
+// IMPORTACIONES SIMPLIFICADAS
+// ================================
+import { docGenService } from '@/services/api/index.js'
+import { formatFileSize, formatDate } from '@/services/utils/formatters.js'
 
 export default {
     name: 'TemplateEditor',
+
     data() {
         return {
             // Estado de conexión
@@ -280,15 +284,18 @@ export default {
             selectedTemplate: null,
             templateData: null,
             loadingTemplates: false,
+            loadingExample: false,
 
             // Formulario dinámico
             formData: {},
 
             // Preview
-            previewMode: 'rendered', // 'html' o 'rendered'
+            previewMode: 'rendered', // Usar string directamente
             previewHTML: '',
+            previousPreviewHTML: '',
             loadingPreview: false,
             loadingPDF: false,
+            isShowingExample: false,
 
             // Notificaciones
             snackbar: {
@@ -301,41 +308,47 @@ export default {
 
     computed: {
         hasArrays() {
-            if (!this.templateData || !this.templateData.arrayInfo) return false
-            return this.templateData.arrayInfo.length > 0
+            return this.templateData?.arrayInfo?.length > 0
         },
 
-        arrayNames() {
-            if (!this.templateData || !this.templateData.arrayInfo) return []
-            return this.templateData.arrayInfo.map(arr => arr.name)
-        },
-
-        // Mostrar botón PDF cuando hay template seleccionado
         shouldShowPDFButton() {
             return this.selectedTemplate !== null
         }
     },
 
     async mounted() {
-        await this.checkConnection()
-        if (this.connectionStatus) {
-            await this.loadTemplates()
-        }
+        await this.initializeComponent()
     },
 
     methods: {
+        // ================================
+        // INICIALIZACIÓN
+        // ================================
+        async initializeComponent() {
+            await this.checkConnection()
+            if (this.connectionStatus) {
+                await this.loadTemplates()
+            }
+        },
+
         // ================================
         // CONEXIÓN Y HEALTH CHECK
         // ================================
         async checkConnection() {
             this.loadingConnection = true
             try {
-                const response = await axios.get('/api/health', {})
-                this.connectionStatus = true
-                this.showMessage('Conectado al servidor PDF', 'success')
+                const health = await docGenService.healthCheck()
+                this.connectionStatus = health.status === 'online'
+
+                if (this.connectionStatus) {
+                    this.showMessage('Conectado al servidor PDF', 'success')
+                } else {
+                    this.showMessage('Error de conexión con el servidor', 'error')
+                }
+
             } catch (error) {
                 this.connectionStatus = false
-                this.showMessage('Error de conexión con el servidor', 'error')
+                this.showMessage(error.friendlyMessage || 'Error de conexión con el servidor', 'error')
                 console.error('Error de conexión:', error)
             } finally {
                 this.loadingConnection = false
@@ -348,23 +361,22 @@ export default {
         async loadTemplates() {
             this.loadingTemplates = true
             try {
-                const response = await axios.post('/api/templates', {
-                    config: { token: '1434' }
-                })
+                const response = await docGenService.getTemplates()
 
-                if (response.data.success) {
-                    // Procesar templates para mejor visualización
-                    this.templates = response.data.templates.map(template => ({
+                if (response.success) {
+                    this.templates = response.templates.map(template => ({
                         ...template,
-                        displayName: `📄 ${template.name}`
+                        displayName: `📄 ${template.name}`,
+                        formattedSize: formatFileSize(template.size),
+                        formattedDate: formatDate(template.modified)
                     }))
 
                     this.showMessage(`${this.templates.length} templates cargados`, 'success')
                 }
 
             } catch (error) {
-                this.showMessage('Error cargando templates', 'error')
-                console.error('Error:', error)
+                this.showMessage(error.friendlyMessage || 'Error cargando templates', 'error')
+                console.error('Error cargando templates:', error)
             } finally {
                 this.loadingTemplates = false
             }
@@ -374,24 +386,20 @@ export default {
             if (!this.selectedTemplate) return
 
             try {
-                const response = await axios.post(`/api/templates/${this.selectedTemplate}`, {
-                    config: { token: '1434' }
-                })
+                const response = await docGenService.getTemplateDetails(this.selectedTemplate)
 
-                if (response.data.success) {
-                    const template = response.data.template
+                if (response.success) {
+                    const template = response.template
 
-                    // Procesar inteligentemente las variables y loops
-                    const smartProcessing = this.smartExtractVariables(template.content)
+                    // Usar el método del servicio para extraer variables
+                    const variableInfo = docGenService.extractTemplateVariables(template.content)
 
                     this.templateData = {
                         ...template,
-                        variables: smartProcessing.normalVariables,
-                        loops: smartProcessing.loops,
-                        arrayInfo: smartProcessing.arrayInfo
+                        ...variableInfo
                     }
 
-                    console.log('🧠 Procesamiento inteligente:', smartProcessing)
+                    console.log('🧠 Template procesado:', this.templateData)
 
                     this.initializeFormData()
                     await this.generatePreview()
@@ -399,78 +407,15 @@ export default {
                 }
 
             } catch (error) {
-                this.showMessage('Error cargando detalles del template', 'error')
-                console.error('Error:', error)
+                this.showMessage(error.friendlyMessage || 'Error cargando template', 'error')
+                console.error('Error cargando template:', error)
             }
-        },
-
-        // ================================
-        // EXTRACCIÓN SÚPER INTELIGENTE
-        // ================================
-        smartExtractVariables(templateContent) {
-            const result = {
-                normalVariables: [],
-                loops: [],
-                arrayInfo: []
-            }
-
-            // 1. Detectar TODOS los arrays {{#each CUALQUIER_NOMBRE}}
-            const arrayRegex = /\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g
-            const arraysFound = new Set()
-            const variablesInArrays = new Set()
-
-            let arrayMatch
-            while ((arrayMatch = arrayRegex.exec(templateContent)) !== null) {
-                const arrayName = arrayMatch[1]
-                const arrayContent = arrayMatch[2]
-
-                arraysFound.add(arrayName)
-
-                // Extraer variables dentro de este array
-                const arrayVariables = arrayContent.match(/\{\{([^}#\/]+)\}\}/g) || []
-                const cleanArrayVars = arrayVariables.map(v => v.replace(/[{}]/g, '').trim())
-
-                cleanArrayVars.forEach(variable => {
-                    if (!variable.startsWith('#') && !variable.startsWith('/') && variable !== 'else') {
-                        variablesInArrays.add(variable)
-                    }
-                })
-
-                result.arrayInfo.push({
-                    name: arrayName,
-                    variables: cleanArrayVars.filter(v => !v.startsWith('#') && !v.startsWith('/') && v !== 'else')
-                })
-
-                console.log(`🔍 Array detectado: "${arrayName}" con variables:`, cleanArrayVars)
-            }
-
-            // 2. Extraer TODAS las variables del template
-            const allVariableMatches = templateContent.match(/\{\{([^}#\/]+)\}\}/g) || []
-            const allVariables = allVariableMatches.map(match => match.replace(/[{}]/g, '').trim())
-
-            // 3. Filtrar variables normales (excluir las que están en arrays)
-            result.normalVariables = [...new Set(allVariables.filter(variable => {
-                return !variable.startsWith('#') &&
-                    !variable.startsWith('/') &&
-                    !variable.includes('this') &&
-                    variable !== 'else' &&
-                    !variablesInArrays.has(variable)
-            }))]
-
-            result.loops = Array.from(arraysFound).map(arrayName => `each ${arrayName}`)
-
-            console.log('✅ Variables normales:', result.normalVariables)
-            console.log('🚫 Variables en arrays (excluidas):', [...variablesInArrays])
-            console.log('🔄 Arrays detectados:', result.loops)
-
-            return result
         },
 
         // ================================
         // FORMULARIO DINÁMICO
         // ================================
         initializeFormData() {
-            // Inicializar formData vacío para que muestre [Variable no definida]
             this.formData = {}
 
             // Inicializar arrays detectados
@@ -488,10 +433,9 @@ export default {
                 this.formData[arrayName] = []
             }
 
-            // Crear objeto VACÍO para que muestre [Variable no definida] en cada campo
             const newItem = {}
             variables.forEach(variable => {
-                newItem[variable] = '' // VACÍO para mostrar placeholder
+                newItem[variable] = ''
             })
 
             this.formData[arrayName].push(newItem)
@@ -515,69 +459,24 @@ export default {
             if (!this.selectedTemplate || !this.templateData) return
 
             this.loadingPreview = true
-            this.isShowingExample = false // Ya no es ejemplo
+            this.isShowingExample = false
+
             try {
-                this.previewHTML = this.compileTemplate(this.templateData.content, this.formData)
-                this.previousPreviewHTML = this.previewHTML // Guardar para poder volver
+                // Usar el método del servicio para compilar
+                this.previewHTML = docGenService.compileTemplate(
+                    this.templateData.content,
+                    this.formData,
+                    this.templateData.arrayInfo
+                )
+
+                this.previousPreviewHTML = this.previewHTML
+
             } catch (error) {
-                this.showMessage('Error generando preview', 'error')
-                console.error('Error:', error)
+                this.showMessage(error.friendlyMessage || 'Error generando preview', 'error')
+                console.error('Error generando preview:', error)
             } finally {
                 this.loadingPreview = false
             }
-        },
-
-        compileTemplate(template, data) {
-            let html = template
-
-            // 1. Reemplazar variables simples {{variable}}
-            Object.keys(data).forEach(key => {
-                if (typeof data[key] === 'string') {
-                    const regex = new RegExp(`{{${key}}}`, 'g')
-                    html = html.replace(regex, data[key] || '')
-                }
-            })
-
-            // 2. Manejar arrays dinámicamente
-            if (this.templateData?.arrayInfo) {
-                this.templateData.arrayInfo.forEach(arrayInfo => {
-                    const arrayName = arrayInfo.name
-                    const arrayData = data[arrayName]
-
-                    if (arrayData && Array.isArray(arrayData) && arrayData.length > 0) {
-                        const arrayRegex = new RegExp(`{{#each\\s+${arrayName}}}([\\s\\S]*?){{/each}}`, 'g')
-                        const match = arrayRegex.exec(html)
-
-                        if (match) {
-                            const arrayTemplate = match[1]
-                            let arrayRows = ''
-
-                            arrayData.forEach(item => {
-                                let itemRow = arrayTemplate
-
-                                Object.keys(item).forEach(key => {
-                                    const regex = new RegExp(`{{${key}}}`, 'g')
-                                    itemRow = itemRow.replace(regex, item[key] || '')
-                                })
-
-                                arrayRows += itemRow
-                            })
-
-                            html = html.replace(match[0], arrayRows)
-                            console.log(`✅ Array "${arrayName}" compilado: ${arrayData.length} items`)
-                        }
-                    } else {
-                        const arrayRegex = new RegExp(`{{#each\\s+${arrayName}}}[\\s\\S]*?{{/each}}`, 'g')
-                        html = html.replace(arrayRegex, '')
-                        console.log(`❌ Array "${arrayName}" vacío, loop removido`)
-                    }
-                })
-            }
-
-            // 3. Variables no reemplazadas = [Variable no definida]
-            html = html.replace(/{{[^}]+}}/g, '<span style="color: red; background: yellow; padding: 2px;">[Variable no definida]</span>')
-
-            return html
         },
 
         async generatePDF() {
@@ -585,138 +484,59 @@ export default {
 
             this.loadingPDF = true
             try {
-                let pdfData
+                let pdfBlob
 
                 if (this.isShowingExample) {
-                    // Generar PDF del ejemplo - obtener datos del servidor
-                    const dataResponse = await axios.post(`/api/templates/${this.selectedTemplate}`, {
-                        config: { token: '1434' }
-                    })
-
-                    if (dataResponse.data.success && dataResponse.data.template.sampleData) {
-                        pdfData = {
-                            ...dataResponse.data.template.sampleData,
-                            config: { token: '1434' }
-                        }
-                        console.log('📄 Enviando datos del EJEMPLO al PDF:', pdfData)
-                    } else {
-                        throw new Error('No se pudieron obtener los datos del ejemplo')
-                    }
+                    // Generar PDF del ejemplo
+                    pdfBlob = await docGenService.generateExamplePDF(this.selectedTemplate)
                 } else {
+                    // Validar datos antes de generar
+                    const validation = docGenService.validateTemplateData(this.formData)
+
+                    if (!validation.isValid) {
+                        this.showMessage(`Errores: ${validation.errors.join(', ')}`, 'error')
+                        return
+                    }
+
                     // Generar PDF con datos del formulario
-                    pdfData = { config: { token: '1434' } }
-
-                    // Agregar variables normales
-                    if (this.templateData?.variables) {
-                        this.templateData.variables.forEach(variable => {
-                            if (this.formData[variable]) {
-                                pdfData[variable] = this.formData[variable]
-                            }
-                        })
-                    }
-
-                    // Agregar arrays (productos, etc.)
-                    if (this.templateData?.arrayInfo) {
-                        this.templateData.arrayInfo.forEach(arrayInfo => {
-                            const arrayName = arrayInfo.name
-                            if (this.formData[arrayName] && Array.isArray(this.formData[arrayName])) {
-                                pdfData[arrayName] = this.formData[arrayName]
-                            }
-                        })
-                    }
-
-                    console.log('📄 Enviando datos del FORMULARIO al PDF:', pdfData)
+                    pdfBlob = await docGenService.generatePDF(this.selectedTemplate, this.formData)
                 }
 
-                const response = await axios.post(`/api/pdf/view?template=${this.selectedTemplate}`, pdfData, {
-                    responseType: 'blob'
-                })
-
                 // Descargar PDF
-                const url = window.URL.createObjectURL(new Blob([response.data]))
-                const link = document.createElement('a')
-                link.href = url
-                const fileName = this.isShowingExample
-                    ? `${this.selectedTemplate}-ejemplo-${Date.now()}.pdf`
-                    : `${this.selectedTemplate}-${Date.now()}.pdf`
-                link.setAttribute('download', fileName)
-                document.body.appendChild(link)
-                link.click()
-                link.remove()
-                window.URL.revokeObjectURL(url)
+                this.downloadBlob(
+                    pdfBlob,
+                    this.isShowingExample
+                        ? `${this.selectedTemplate}-ejemplo-${Date.now()}.pdf`
+                        : `${this.selectedTemplate}-${Date.now()}.pdf`
+                )
 
                 const message = this.isShowingExample
                     ? 'PDF del ejemplo generado y descargado'
-                    : 'PDF generado y descargado'
+                    : 'PDF generado exitosamente'
+
                 this.showMessage(message, 'success')
 
             } catch (error) {
-                this.showMessage('Error generando PDF', 'error')
-                console.error('Error:', error)
+                this.showMessage(error.friendlyMessage || 'Error generando PDF', 'error')
+                console.error('Error generando PDF:', error)
             } finally {
                 this.loadingPDF = false
             }
         },
 
         // ================================
-        // UTILIDADES
-        // ================================
-        showMessage(message, color = 'info') {
-            this.snackbar = {
-                show: true,
-                message,
-                color
-            }
-        },
-
-        onPreviewLoad() {
-            console.log('Preview cargado')
-        },
-
-        refreshPreview() {
-            this.$nextTick(() => {
-                if (this.$refs.previewFrame) {
-                    this.$refs.previewFrame.src = this.$refs.previewFrame.src
-                }
-            })
-        },
-
-        formatFileSize(bytes) {
-            if (bytes === 0) return '0 B'
-            const k = 1024
-            const sizes = ['B', 'KB', 'MB']
-            const i = Math.floor(Math.log(bytes) / Math.log(k))
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-        },
-
-        formatDate(dateString) {
-            const date = new Date(dateString)
-            return date.toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: '2-digit'
-            })
-        },
-
-        // ================================
-        // PREVIEW CON EJEMPLO DESDE API
-        // ================================
-        // ================================
         // TOGGLE ENTRE EJEMPLO Y EDICIÓN
         // ================================
         async toggleExample() {
             if (this.isShowingExample) {
-                // Volver a modo edición
                 this.backToEdit()
             } else {
-                // Mostrar ejemplo
                 await this.showExampleInPreview()
             }
         },
 
         backToEdit() {
             this.isShowingExample = false
-            // Restaurar el preview anterior si existía
             if (this.previousPreviewHTML) {
                 this.previewHTML = this.previousPreviewHTML
                 this.showMessage('Vista restaurada - Puedes seguir editando', 'info')
@@ -725,38 +545,32 @@ export default {
                 this.showMessage('Vuelve a generar tu preview personalizado', 'info')
             }
         },
-        // ================================
-        // MOSTRAR EJEMPLO EN EL PREVIEW PRINCIPAL  
-        // ================================
+
         async showExampleInPreview() {
             if (!this.selectedTemplate) return
 
             this.loadingExample = true
             try {
-                // Guardar el preview actual antes de mostrar el ejemplo
+                // Guardar el preview actual
                 if (this.previewHTML && !this.isShowingExample) {
                     this.previousPreviewHTML = this.previewHTML
                 }
 
-                const response = await axios.post(`/api/templates/${this.selectedTemplate}/preview`, {
-                    config: { token: '1434' }
-                })
-
-                this.previewHTML = response.data
+                this.previewHTML = await docGenService.getTemplatePreview(this.selectedTemplate)
                 this.isShowingExample = true
                 this.previewMode = 'rendered'
                 this.showMessage('Ejemplo cargado en el preview', 'success')
 
             } catch (error) {
-                this.showMessage('Error cargando ejemplo del template', 'error')
-                console.error('Error:', error)
+                this.showMessage(error.friendlyMessage || 'Error cargando ejemplo', 'error')
+                console.error('Error cargando ejemplo:', error)
             } finally {
                 this.loadingExample = false
             }
         },
 
         // ================================
-        // COPIAR HTML AL PORTAPAPELES
+        // UTILIDADES
         // ================================
         async copyHtmlToClipboard() {
             if (!this.previewHTML) {
@@ -768,7 +582,7 @@ export default {
                 await navigator.clipboard.writeText(this.previewHTML)
                 this.showMessage('HTML copiado al portapapeles', 'success')
             } catch (error) {
-                // Fallback para navegadores que no soportan clipboard API
+                // Fallback para navegadores antiguos
                 const textArea = document.createElement('textarea')
                 textArea.value = this.previewHTML
                 document.body.appendChild(textArea)
@@ -777,6 +591,29 @@ export default {
                 document.body.removeChild(textArea)
                 this.showMessage('HTML copiado al portapapeles', 'success')
             }
+        },
+
+        downloadBlob(blob, filename) {
+            const url = window.URL.createObjectURL(new Blob([blob]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+        },
+
+        showMessage(message, color = 'info') {
+            this.snackbar = {
+                show: true,
+                message,
+                color
+            }
+        },
+
+        onPreviewLoad() {
+            console.log('Preview cargado')
         }
     }
 }
@@ -870,7 +707,6 @@ export default {
     font-size: 16px;
 }
 
-/* Marca de agua para ejemplos */
 .watermark {
     position: absolute;
     top: 50%;
