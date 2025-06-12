@@ -1,43 +1,32 @@
 /* src/assets/styles/global-optimization.css */
 /* ================================================== */
-/* OPTIMIZACIÓN GLOBAL PARA 100% ZOOM */
+/* OPTIMIZACIÓN SUAVE PARA MEJOR LEGIBILIDAD */
 /* ================================================== */
 
-/* Reset de tamaños base de Vuetify */
+/* Variables más conservadoras - menos agresivas */
 :root {
     --v-theme-surface-variant: rgba(var(--v-theme-on-surface), 0.12);
 
-    /* Escala de tipografía optimizada */
-    --typography-scale: 0.9;
-
-    /* Espaciado optimizado */
-    --spacing-scale: 0.85;
-
-    /* Altura de elementos optimizada */
-    --element-height-scale: 0.9;
+    /* Escalas menos agresivas para mejor legibilidad */
+    --typography-scale: 0.95;
+    /* Era 0.9, ahora más cerca del original */
+    --spacing-scale: 0.92;
+    /* Era 0.85, ahora más espacioso */
+    --element-height-scale: 0.95;
+    /* Era 0.9, conservando más altura */
 }
 
 /* ================================================== */
-/* TIPOGRAFÍA OPTIMIZADA */
+/* TIPOGRAFÍA - AJUSTE MÍNIMO */
 /* ================================================== */
 .v-application {
-    font-size: 14px !important;
-    line-height: 1.4 !important;
+    font-size: 15px !important;
+    /* Era 14px, ahora más legible */
+    line-height: 1.5 !important;
+    /* Era 1.4, ahora más cómodo */
 }
 
-/* Headers más compactos */
-.text-h1 {
-    font-size: calc(2.5rem * var(--typography-scale)) !important;
-}
-
-.text-h2 {
-    font-size: calc(2rem * var(--typography-scale)) !important;
-}
-
-.text-h3 {
-    font-size: calc(1.75rem * var(--typography-scale)) !important;
-}
-
+/* Headers - reducción mínima */
 .text-h4 {
     font-size: calc(1.5rem * var(--typography-scale)) !important;
 }
@@ -50,15 +39,7 @@
     font-size: calc(1.1rem * var(--typography-scale)) !important;
 }
 
-/* Subtítulos y texto del cuerpo */
-.text-subtitle-1 {
-    font-size: calc(1rem * var(--typography-scale)) !important;
-}
-
-.text-subtitle-2 {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
+/* Texto del cuerpo - mínima reducción */
 .text-body-1 {
     font-size: calc(1rem * var(--typography-scale)) !important;
 }
@@ -72,321 +53,160 @@
 }
 
 /* ================================================== */
-/* COMPONENTES VUETIFY OPTIMIZADOS */
+/* COMPONENTES - OPTIMIZACIÓN SELECTIVA */
 /* ================================================== */
 
-/* Cards más compactas */
-.v-card {
-    border-radius: 8px !important;
-}
-
+/* Cards - reducción muy sutil */
 .v-card-title {
-    padding: calc(12px * var(--spacing-scale)) calc(16px * var(--spacing-scale)) !important;
+    padding: calc(14px * var(--spacing-scale)) calc(16px * var(--spacing-scale)) !important;
     font-size: calc(1.1rem * var(--typography-scale)) !important;
-    line-height: 1.3 !important;
 }
 
 .v-card-text {
     padding: calc(16px * var(--spacing-scale)) !important;
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
 }
 
-.v-card-actions {
-    padding: calc(8px * var(--spacing-scale)) calc(16px * var(--spacing-scale)) !important;
-    min-height: auto !important;
-}
-
-/* Buttons más compactos */
+/* Buttons - mantener tamaños cómodos */
 .v-btn {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-    letter-spacing: 0.02em !important;
+    font-size: calc(0.9rem * var(--typography-scale)) !important;
 }
 
 .v-btn--size-small {
-    height: calc(32px * var(--element-height-scale)) !important;
-    min-width: calc(48px * var(--element-height-scale)) !important;
-    padding: 0 calc(12px * var(--spacing-scale)) !important;
-    font-size: calc(0.8rem * var(--typography-scale)) !important;
+    height: calc(36px * var(--element-height-scale)) !important;
+    /* Era 32px */
+    padding: 0 calc(14px * var(--spacing-scale)) !important;
 }
 
-.v-btn--size-large {
-    height: calc(48px * var(--element-height-scale)) !important;
-    min-width: calc(72px * var(--element-height-scale)) !important;
-    padding: 0 calc(24px * var(--spacing-scale)) !important;
-}
+/* ================================================== */
+/* FORMS - SIN COMPRESIÓN AGRESIVA */
+/* ================================================== */
 
-/* Text fields más compactos */
-.v-field {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-.v-field--variant-outlined .v-field__outline__start,
-.v-field--variant-outlined .v-field__outline__end {
-    border-radius: 6px !important;
-}
-
+/* Mantener altura cómoda para inputs */
 .v-field__input {
-    padding: calc(8px * var(--spacing-scale)) calc(12px * var(--spacing-scale)) !important;
-    min-height: calc(40px * var(--element-height-scale)) !important;
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
+    padding: calc(12px * var(--spacing-scale)) calc(14px * var(--spacing-scale)) !important;
+    min-height: calc(50px * var(--element-height-scale)) !important;
+    /* Era 40px */
+    font-size: calc(0.9rem * var(--typography-scale)) !important;
 }
 
-.v-field--density-compact .v-field__input {
-    padding: calc(4px * var(--spacing-scale)) calc(12px * var(--spacing-scale)) !important;
-    min-height: calc(36px * var(--element-height-scale)) !important;
-}
-
-/* Labels más pequeños */
-.v-label {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-.v-field--focused .v-label,
-.v-field--dirty .v-label {
-    font-size: calc(0.75rem * var(--typography-scale)) !important;
-}
-
-/* Chips más compactos */
-.v-chip {
-    font-size: calc(0.8rem * var(--typography-scale)) !important;
-    height: calc(28px * var(--element-height-scale)) !important;
-}
-
-.v-chip--size-small {
-    font-size: calc(0.75rem * var(--typography-scale)) !important;
-    height: calc(24px * var(--element-height-scale)) !important;
-}
-
-.v-chip--size-x-small {
-    font-size: calc(0.7rem * var(--typography-scale)) !important;
-    height: calc(20px * var(--element-height-scale)) !important;
-}
-
-/* Alerts más compactos */
-.v-alert {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-.v-alert--density-compact {
-    padding: calc(8px * var(--spacing-scale)) calc(12px * var(--spacing-scale)) !important;
-}
-
-/* List items más compactos */
-.v-list-item {
-    min-height: calc(40px * var(--element-height-scale)) !important;
-    padding: 0 calc(12px * var(--spacing-scale)) !important;
-}
-
-.v-list-item--density-compact {
-    min-height: calc(36px * var(--element-height-scale)) !important;
-}
-
-.v-list-item-title {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-    line-height: 1.3 !important;
-}
-
-.v-list-item-subtitle {
-    font-size: calc(0.75rem * var(--typography-scale)) !important;
-    line-height: 1.2 !important;
-}
-
-/* Selects más compactos pero sin cortar */
-.v-select__selection {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-    line-height: 1.4 !important;
-}
-
+/* Selects - altura cómoda y legible */
 .v-select .v-field__input {
-    padding: calc(8px * var(--spacing-scale)) calc(12px * var(--spacing-scale)) !important;
-    min-height: calc(48px * var(--element-height-scale)) !important;
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
+    min-height: 54px !important;
+    /* Altura fija cómoda */
+    padding: 14px 16px !important;
+    /* Padding generoso */
+    font-size: 15px !important;
+    /* Tamaño legible */
+    line-height: 1.4 !important;
     display: flex !important;
     align-items: center !important;
 }
 
-.v-select--density-compact .v-field__input {
-    min-height: calc(44px * var(--element-height-scale)) !important;
-    padding: calc(6px * var(--spacing-scale)) calc(12px * var(--spacing-scale)) !important;
-}
-
-/* Fix para dropdown del select */
-.v-overlay__content .v-list {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-.v-select__menu-icon {
-    margin-left: calc(8px * var(--spacing-scale)) !important;
-}
-
-/* Fix específico para el placeholder y texto seleccionado */
-.v-field__input input {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-.v-select .v-select__selection-text {
+.v-select .v-select__selection {
+    line-height: 1.4 !important;
+    height: auto !important;
     overflow: visible !important;
-    text-overflow: clip !important;
-    white-space: normal !important;
+}
+
+.v-select .v-field__append-inner {
+    align-items: center !important;
+    padding-top: 0 !important;
+    height: 54px !important;
+}
+
+/* Labels cómodos */
+.v-label {
+    font-size: calc(0.9rem * var(--typography-scale)) !important;
+}
+
+/* ================================================== */
+/* CHIPS Y ALERTS - REDUCCIÓN MÍNIMA */
+/* ================================================== */
+.v-chip {
+    font-size: calc(0.85rem * var(--typography-scale)) !important;
+    height: calc(30px * var(--element-height-scale)) !important;
+    /* Era 28px */
+}
+
+.v-alert {
+    font-size: calc(0.9rem * var(--typography-scale)) !important;
+}
+
+/* ================================================== */
+/* NAVEGACIÓN - COMPACTA PERO LEGIBLE */
+/* ================================================== */
+.v-list-item {
+    min-height: calc(44px * var(--element-height-scale)) !important;
+    /* Era 40px */
+    padding: 0 calc(14px * var(--spacing-scale)) !important;
+}
+
+.v-list-item-title {
+    font-size: calc(0.9rem * var(--typography-scale)) !important;
     line-height: 1.4 !important;
 }
 
-/* Tabs más compactos */
-.v-tab {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-    height: calc(40px * var(--element-height-scale)) !important;
-    padding: 0 calc(16px * var(--spacing-scale)) !important;
-}
-
-/* App bar más compacto */
+/* App bar cómodo */
 .v-app-bar {
-    height: calc(56px * var(--element-height-scale)) !important;
-}
-
-.v-app-bar-title {
-    font-size: calc(1.1rem * var(--typography-scale)) !important;
-}
-
-/* Navigation drawer más compacto */
-.v-navigation-drawer {
-    --v-layout-item-margin: calc(8px * var(--spacing-scale));
-}
-
-.v-navigation-drawer .v-list-item {
-    padding: calc(4px * var(--spacing-scale)) calc(16px * var(--spacing-scale)) !important;
+    height: calc(58px * var(--element-height-scale)) !important;
+    /* Era 56px */
 }
 
 /* ================================================== */
-/* CONTENEDORES Y ESPACIADO */
+/* CONTAINERS - ESPACIADO EQUILIBRADO */
 /* ================================================== */
-
-/* Container fluid más ajustado */
-.v-container.container--fluid {
-    padding: calc(12px * var(--spacing-scale)) !important;
-}
-
 .v-container {
-    padding: calc(12px * var(--spacing-scale)) !important;
+    padding: calc(14px * var(--spacing-scale)) !important;
+    /* Era 12px */
 }
 
-/* Rows y cols más compactos */
 .v-row {
-    margin: calc(-6px * var(--spacing-scale)) !important;
+    margin: calc(-8px * var(--spacing-scale)) !important;
+    /* Era -6px */
 }
 
 .v-col {
-    padding: calc(6px * var(--spacing-scale)) !important;
-}
-
-.v-row.no-gutters {
-    margin: 0 !important;
-}
-
-.v-row.no-gutters .v-col {
-    padding: 0 !important;
-}
-
-/* Clases de espaciado personalizadas */
-.pa-1 {
-    padding: calc(4px * var(--spacing-scale)) !important;
-}
-
-.pa-2 {
     padding: calc(8px * var(--spacing-scale)) !important;
-}
-
-.pa-3 {
-    padding: calc(12px * var(--spacing-scale)) !important;
-}
-
-.pa-4 {
-    padding: calc(16px * var(--spacing-scale)) !important;
-}
-
-.pa-5 {
-    padding: calc(20px * var(--spacing-scale)) !important;
-}
-
-.pa-6 {
-    padding: calc(24px * var(--spacing-scale)) !important;
-}
-
-.ma-1 {
-    margin: calc(4px * var(--spacing-scale)) !important;
-}
-
-.ma-2 {
-    margin: calc(8px * var(--spacing-scale)) !important;
-}
-
-.ma-3 {
-    margin: calc(12px * var(--spacing-scale)) !important;
-}
-
-.ma-4 {
-    margin: calc(16px * var(--spacing-scale)) !important;
-}
-
-.ma-5 {
-    margin: calc(20px * var(--spacing-scale)) !important;
-}
-
-.ma-6 {
-    margin: calc(24px * var(--spacing-scale)) !important;
+    /* Era 6px */
 }
 
 /* ================================================== */
-/* ICONOS OPTIMIZADOS */
-/* ================================================== */
-.v-icon {
-    font-size: calc(20px * var(--typography-scale)) !important;
-}
-
-.v-icon.v-icon--size-small {
-    font-size: calc(16px * var(--typography-scale)) !important;
-}
-
-.v-icon.v-icon--size-x-small {
-    font-size: calc(14px * var(--typography-scale)) !important;
-}
-
-.v-icon.v-icon--size-large {
-    font-size: calc(28px * var(--typography-scale)) !important;
-}
-
-/* ================================================== */
-/* RESPONSIVE OPTIMIZADO */
+/* RESPONSIVE - MENOS AGRESIVO */
 /* ================================================== */
 @media (max-width: 1400px) {
     :root {
-        --typography-scale: 0.85;
-        --spacing-scale: 0.8;
-        --element-height-scale: 0.85;
+        --typography-scale: 0.92;
+        /* Era 0.85 */
+        --spacing-scale: 0.88;
+        /* Era 0.8 */
+        --element-height-scale: 0.92;
+        /* Era 0.85 */
     }
 }
 
 @media (max-width: 1200px) {
     :root {
-        --typography-scale: 0.8;
-        --spacing-scale: 0.75;
-        --element-height-scale: 0.8;
+        --typography-scale: 0.9;
+        /* Era 0.8 */
+        --spacing-scale: 0.85;
+        /* Era 0.75 */
+        --element-height-scale: 0.9;
+        /* Era 0.8 */
     }
 }
 
 @media (max-width: 960px) {
     :root {
-        --typography-scale: 0.9;
-        --spacing-scale: 0.9;
-        --element-height-scale: 0.9;
-    }
-
-    .v-container {
-        padding: calc(8px * var(--spacing-scale)) !important;
+        /* En tablet/mobile, usar tamaños más normales */
+        --typography-scale: 0.95;
+        --spacing-scale: 0.95;
+        --element-height-scale: 0.98;
     }
 }
 
 @media (max-width: 600px) {
     :root {
+        /* En mobile, usar tamaños estándar */
         --typography-scale: 1;
         --spacing-scale: 1;
         --element-height-scale: 1;
@@ -394,21 +214,23 @@
 }
 
 /* ================================================== */
-/* SCROLLBARS GLOBALES OPTIMIZADOS */
+/* SCROLLBARS SUAVES */
 /* ================================================== */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    /* Era 6px */
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
     background: #f8f9fa;
-    border-radius: 3px;
+    border-radius: 4px;
+    /* Era 3px */
 }
 
 ::-webkit-scrollbar-thumb {
     background: #dee2e6;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -416,95 +238,49 @@
 }
 
 /* ================================================== */
-/* UTILIDADES ADICIONALES */
+/* UTILIDADES DE ESPACIADO EQUILIBRADAS */
 /* ================================================== */
-.compact-layout {
+.pa-2 {
+    padding: calc(10px * var(--spacing-scale)) !important;
+    /* Era 8px */
+}
+
+.pa-3 {
+    padding: calc(14px * var(--spacing-scale)) !important;
+    /* Era 12px */
+}
+
+.pa-4 {
+    padding: calc(18px * var(--spacing-scale)) !important;
+    /* Era 16px */
+}
+
+.ma-2 {
+    margin: calc(10px * var(--spacing-scale)) !important;
+}
+
+.ma-3 {
+    margin: calc(14px * var(--spacing-scale)) !important;
+}
+
+.ma-4 {
+    margin: calc(18px * var(--spacing-scale)) !important;
+}
+
+/* ================================================== */
+/* CLASES HELPER OPCIONALES */
+/* ================================================== */
+
+/* Para elementos que necesiten ser más compactos */
+.ultra-compact {
     --typography-scale: 0.8 !important;
-    --spacing-scale: 0.7 !important;
+    --spacing-scale: 0.75 !important;
     --element-height-scale: 0.8 !important;
 }
 
-.density-compact * {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
+/* Para elementos que necesiten tamaño normal */
+.standard-size {
+    --typography-scale: 1 !important;
+    --spacing-scale: 1 !important;
+    --element-height-scale: 1 !important;
 }
-
-/* Fix para elementos que se ven muy grandes */
-.v-data-table {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-.v-data-table th,
-.v-data-table td {
-    padding: calc(8px * var(--spacing-scale)) calc(16px * var(--spacing-scale)) !important;
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-/* Fix para formularios */
-.v-form .v-field {
-    margin-bottom: calc(8px * var(--spacing-scale)) !important;
-}
-
-/* Fix para dialogs */
-.v-dialog .v-card {
-    font-size: calc(0.875rem * var(--typography-scale)) !important;
-}
-
-/* ================================================== */
-/* FIX ESPECÍFICO PARA SELECTS CORTADOS */
-/* ================================================== */
-
-/* Select con altura suficiente para mostrar texto completo */
-.v-select-fixed {
-    .v-field__input {
-        min-height: 48px !important;
-        padding: 12px 16px !important;
-        align-items: center !important;
-        display: flex !important;
-    }
-
-    .v-select__selection {
-        line-height: 1.5 !important;
-        height: auto !important;
-        margin: 2px 0 !important;
-    }
-
-    .v-field__append-inner {
-        align-items: center !important;
-        padding-top: 0 !important;
-    }
-}
-
-/* Select compacto pero sin cortar */
-.v-select-compact {
-    .v-field__input {
-        min-height: 40px !important;
-        padding: 8px 12px !important;
-        align-items: center !important;
-        display: flex !important;
-    }
-
-    .v-select__selection {
-        line-height: 1.4 !important;
-        height: auto !important;
-    }
-}
-
-/* ================================================== */
-/* CLASES DE AYUDA PERSONALIZADAS */
-/* ================================================== */
-.text-compact {
-    font-size: calc(0.8rem * var(--typography-scale)) !important;
-}
-
-.text-tiny {
-    font-size: calc(0.7rem * var(--typography-scale)) !important;
-}
-
-.spacing-tight {
-    padding: calc(8px * var(--spacing-scale)) !important;
-    margin: calc(4px * var(--spacing-scale)) !important;
-}
-
-.height-optimized {
-    height: calc(100vh - 120px) !important;
-    overflow-y: auto; }

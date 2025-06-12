@@ -85,7 +85,7 @@
                             </v-alert>
 
                             <!-- Scroll container para variables -->
-                            <div style="max-height: 350px; overflow-y: auto;">
+                            <div style="max-height: 400px; overflow-y: auto;">
                                 <!-- Variables simples -->
                                 <div v-for="variable in templateData.normalVariables" :key="variable" class="mb-3">
                                     <v-text-field v-model="formData[variable]" :label="variable" variant="outlined"
@@ -196,13 +196,13 @@
                     </v-card-text>
 
                     <!-- Botón de Preview en footer -->
-                    <v-card-actions class="pa-4">
+                    <!-- <v-card-actions class="pa-4">
                         <v-btn color="orange" block @click="generatePreview" :loading="loadingPreview"
                             :disabled="!selectedTemplate || isShowingExample" size="large">
                             <v-icon left>mdi-eye</v-icon>
                             Actualizar Preview
                         </v-btn>
-                    </v-card-actions>
+                    </v-card-actions> -->
                 </v-card>
             </v-col>
 
