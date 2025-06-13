@@ -187,43 +187,6 @@
             Accesos Rápidos
           </h2>
         </v-col>
-        
-        <v-col cols="12" md="8">
-          <v-card elevation="1">
-            <v-card-text class="pa-6">
-              <h3 class="text-h6 mb-4">Acciones Frecuentes</h3>
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <v-btn 
-                    color="primary" 
-                    variant="outlined" 
-                    :to="{ name: 'docgen-editor' }"
-                    block
-                    size="large"
-                    class="mb-3"
-                  >
-                    <v-icon left>mdi-plus</v-icon>
-                    Crear Nuevo Template
-                  </v-btn>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-btn 
-                    color="success" 
-                    variant="outlined" 
-                    :to="{ name: 'docgen-manager' }"
-                    block
-                    size="large"
-                    class="mb-3"
-                  >
-                    <v-icon left>mdi-folder-search</v-icon>
-                    Buscar Templates
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        
         <v-col cols="12" md="4">
           <v-card elevation="1" color="blue-lighten-5">
             <v-card-text class="pa-6">

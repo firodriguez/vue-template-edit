@@ -1,4 +1,4 @@
-<!-- src/layouts/AppLayout.vue - VERSIÓN CORREGIDA -->
+<!-- src/layouts/AppLayout.vue - VERSIÓN COMPLETA OPTIMIZADA -->
 <template>
     <v-app>
         <!-- ================================ -->
@@ -42,14 +42,12 @@
                         <v-list-item v-bind="props" prepend-icon="mdi-file-document-multiple"
                             :title="isRailMode ? '' : 'DocGen Services'" class="text-primary font-weight-medium">
                             <template v-if="!isRailMode" v-slot:append>
-                                <v-chip :color="servicesStatus.docgen === 'online' ? 'success' : 'error'" size="x-small"
-                                    variant="dot"></v-chip>
                             </template>
                         </v-list-item>
                     </template>
 
                     <v-list-item prepend-icon="mdi-file-document-edit" title="Editor de Templates"
-                        value="temp3late-editor" :to="{ name: 'docgen-editor' }" color="primary"
+                        value="template-editor" :to="{ name: 'docgen-editor' }" color="primary"
                         class="pl-12"></v-list-item>
 
                     <v-list-item prepend-icon="mdi-folder-multiple" title="Gestión de Templates"
@@ -67,12 +65,6 @@
                             class="text-grey font-weight-medium"></v-list-item>
                     </template>
 
-                    <!-- <v-list-item prepend-icon="mdi-chart-bar" title="Analytics API" disabled class="pl-12">
-                        <template v-slot:append>
-                            <v-chip size="x-small" color="orange" variant="text">Próximamente</v-chip>
-                        </template>
-                    </v-list-item> -->
-
                     <v-list-item prepend-icon="mdi-account-group" title="Users API" disabled class="pl-12">
                         <template v-slot:append>
                             <v-chip size="x-small" color="orange" variant="text">Próximamente</v-chip>
@@ -89,44 +81,30 @@
                 <v-list-item prepend-icon="mdi-help-circle" title="Ayuda" :to="{ name: 'help' }"></v-list-item>
             </v-list>
 
-            <!-- STATUS FOOTER -->
+            <!-- STATUS FOOTER - SIMPLIFICADO -->
             <template v-slot:append>
                 <div class="pa-3 border-t">
-                    <!-- STATUS DE SERVICIOS -->
+                    <!-- STATUS COMPACTO -->
                     <div v-if="!isRailMode" class="mb-3">
-                        <v-list density="compact" class="bg-transparent">
-                            <v-list-subheader class="text-caption px-0">Estado de Servicios</v-list-subheader>
-
-                            <v-list-item v-for="(status, service) in servicesStatus" :key="service" class="px-0 py-1">
-                                <template v-slot:prepend>
-                                    <v-icon :color="status === 'online' ? 'success' : 'error'" size="small">
-                                        {{ status === 'online' ? 'mdi-check-circle' : 'mdi-alert-circle' }}
-                                    </v-icon>
-                                </template>
-
-                                <v-list-item-title class="text-caption">
-                                    {{ service.toUpperCase() }}
-                                </v-list-item-title>
-
-                                <template v-slot:append>
-                                    <v-chip :color="status === 'online' ? 'success' : 'error'" size="x-small"
-                                        variant="flat">
-                                        {{ status === 'online' ? 'Online' : 'Offline' }}
-                                    </v-chip>
-                                </template>
-                            </v-list-item>
-                        </v-list>
+                        <div class="text-caption text-grey mb-2">Estado de Servicios</div>
+                        <div class="d-flex align-center justify-space-between">
+                            <span class="text-caption">DocGen</span>
+                            <v-chip :color="servicesStatusComputed.docgen === 'online' ? 'success' : 'error'"
+                                size="x-small" variant="flat">
+                                {{ servicesStatusComputed.docgen === 'online' ? 'Online' : 'Offline' }}
+                            </v-chip>
+                        </div>
                     </div>
 
                     <!-- BOTÓN VERIFICAR SERVICIOS -->
-                    <v-btn v-if="!isRailMode" color="primary" variant="tonal" size="small" @click="checkAllServices"
+                    <v-btn v-if="!isRailMode" color="primary" variant="tonal" size="small" @click="manualCheckServices"
                         :loading="loadingServices" block>
                         <v-icon left size="small">mdi-refresh</v-icon>
-                        Verificar Servicios
+                        Verificar
                     </v-btn>
 
                     <v-btn v-else color="primary" variant="tonal" icon="mdi-refresh" size="small"
-                        @click="checkAllServices" :loading="loadingServices"></v-btn>
+                        @click="manualCheckServices" :loading="loadingServices"></v-btn>
                 </div>
             </template>
         </v-navigation-drawer>
@@ -145,24 +123,22 @@
             <v-app-bar-title class="font-weight-bold">
                 {{ currentPageTitle }}
             </v-app-bar-title>
+
             <!-- BREADCRUMBS -->
             <v-breadcrumbs v-if="breadcrumbs.length > 1 && !isMobile" :items="breadcrumbs" class="pa-0"
                 density="compact">
                 <template v-slot:divider>
-                    <v-icon size="small" color="b">mdi-chevron-right</v-icon>
+                    <v-icon size="small" color="white">mdi-chevron-right</v-icon>
                 </template>
             </v-breadcrumbs>
 
             <v-spacer></v-spacer>
-
-
         </v-app-bar>
 
         <!-- ================================ -->
         <!-- MAIN CONTENT AREA -->
         <!-- ================================ -->
         <v-main>
-            <!-- Aquí se monta todo el contenido dinámico -->
             <router-view />
         </v-main>
 
@@ -191,7 +167,7 @@
 </template>
 
 <script>
-import { checkAllServicesHealth } from '@/services/api/index.js'
+import { checkAllServicesHealth, checkServiceHealth } from '@/services/api/index.js'
 
 export default {
     name: 'AppLayout',
@@ -199,18 +175,24 @@ export default {
     data() {
         return {
             // Navegación
-            drawer: true, // Siempre true por defecto
+            drawer: true,
             isRailMode: false,
             showFutureModules: true,
 
             // Detección mobile manual
             isMobile: false,
 
-            // Estado de servicios
+            // Estado de servicios - OPTIMIZADO
             servicesStatus: {
                 docgen: 'unknown'
             },
             loadingServices: false,
+
+            // 🔧 Control de auto-verificación MEJORADO
+            autoCheckInterval: null,
+            lastCheckTime: 0,
+            AUTO_CHECK_COOLDOWN: 5 * 60 * 1000, // 5 minutos
+            MANUAL_CHECK_COOLDOWN: 2000, // 2 segundos para verificación manual
 
             // Notificaciones globales
             globalNotification: {
@@ -225,6 +207,11 @@ export default {
     },
 
     computed: {
+        // COMPUTED PARA EVITAR RE-RENDERS INNECESARIOS
+        servicesStatusComputed() {
+            return { ...this.servicesStatus }
+        },
+
         currentPageTitle() {
             const routeMap = {
                 'dashboard': '🏠 Dashboard Principal',
@@ -253,14 +240,12 @@ export default {
             const route = this.$route
             const breadcrumbs = []
 
-            // Base breadcrumb
             breadcrumbs.push({
                 title: 'Inicio',
                 disabled: false,
                 to: { name: 'dashboard' }
             })
 
-            // Breadcrumbs específicos por ruta
             if (route.name?.startsWith('docgen')) {
                 breadcrumbs.push({
                     title: 'DocGen',
@@ -289,31 +274,95 @@ export default {
         await this.initializeLayout()
     },
 
+    beforeUnmount() {
+        this.cleanup()
+    },
+
     methods: {
         async initializeLayout() {
-            // Detectar mobile manualmente
-            this.checkMobile()
+            console.log('🏗️ [AppLayout] Inicializando layout...')
 
-            // Restaurar preferencias guardadas
+            this.checkMobile()
             this.restoreUserPreferences()
 
-            // Verificar servicios inicial
-            await this.checkAllServices()
+            // 🔧 CHECK INICIAL ÚNICO Y OPTIMIZADO
+            await this.performInitialHealthCheck()
 
-            // Auto-verificar servicios cada 2 minutos
-            setInterval(() => {
-                this.checkAllServices(true) // silent = true
-            }, 2 * 60 * 1000)
+            // 🔧 SETUP AUTO-CHECK CONDICIONAL
+            this.setupAutoCheck()
 
-            // Listener para cambios de tamaño de pantalla
             window.addEventListener('resize', this.checkMobile)
+
+            console.log('✅ [AppLayout] Layout inicializado')
+        },
+
+        // 🔧 NUEVO: Health check inicial optimizado
+        async performInitialHealthCheck() {
+            console.log('🏥 [AppLayout] Verificación inicial de servicios...')
+
+            try {
+                // Usar checkServiceHealth para solo verificar DocGen inicialmente
+                const docgenHealth = await checkServiceHealth('docgen', false) // Sin forzar, usar cache si está disponible
+
+                this.servicesStatus.docgen = docgenHealth.status
+
+                console.log('🏥 [AppLayout] Estado inicial:', docgenHealth)
+
+                // Mostrar notificación solo si hay problemas
+                if (docgenHealth.status !== 'online') {
+                    this.showGlobalNotification({
+                        title: 'Servicio Offline',
+                        message: 'DocGen no está disponible',
+                        color: 'warning',
+                        icon: 'mdi-alert',
+                        timeout: 6000 // Más tiempo para ver la advertencia
+                    })
+                }
+
+            } catch (error) {
+                console.error('❌ [AppLayout] Error en verificación inicial:', error)
+                this.servicesStatus.docgen = 'error'
+            }
+        },
+
+        // 🔧 SETUP AUTO-CHECK CONDICIONAL
+        setupAutoCheck() {
+            // Deshabilitado en desarrollo por defecto
+            if (import.meta.env.DEV && !import.meta.env.VITE_ENABLE_AUTO_CHECK) {
+                console.log('🔧 [AppLayout] Auto-verificación deshabilitada en desarrollo')
+                return
+            }
+
+            console.log('🔧 [AppLayout] Configurando auto-verificación cada 5 minutos')
+
+            this.autoCheckInterval = setInterval(async () => {
+                console.log('⏰ [AppLayout] Auto-verificación programada...')
+                await this.checkAllServices(true) // Siempre silencioso en auto-check
+            }, this.AUTO_CHECK_COOLDOWN)
+        },
+
+        // 🔧 MÉTODO PARA VERIFICACIÓN MANUAL CON MEJOR CONTROL
+        async manualCheckServices() {
+            const now = Date.now()
+
+            // Prevenir spam de verificaciones
+            if (now - this.lastCheckTime < this.MANUAL_CHECK_COOLDOWN) {
+                const waitTime = Math.ceil((this.MANUAL_CHECK_COOLDOWN - (now - this.lastCheckTime)) / 1000)
+                this.showGlobalNotification({
+                    title: 'Espera un momento',
+                    message: `Espera ${waitTime} segundos antes de verificar de nuevo`,
+                    color: 'warning',
+                    icon: 'mdi-timer'
+                })
+                return
+            }
+
+            console.log('🔄 [AppLayout] Verificación manual solicitada')
+            await this.checkAllServices(false, true) // No silencioso, forzar refresh
         },
 
         checkMobile() {
             this.isMobile = window.innerWidth < 960
-
-            // NO auto-ajustar drawer - dejar que el usuario controle
-            // Solo ajustar rail mode en mobile
             if (this.isMobile && this.isRailMode) {
                 this.isRailMode = false
             }
@@ -321,61 +370,84 @@ export default {
 
         toggleSidebar() {
             if (this.isMobile) {
-                // En mobile: toggle drawer
                 this.drawer = !this.drawer
             } else {
-                // En desktop: toggle rail mode
                 this.isRailMode = !this.isRailMode
             }
 
-            // Guardar preferencia
             localStorage.setItem('railMode', this.isRailMode.toString())
             localStorage.setItem('drawerOpen', this.drawer.toString())
         },
 
         toggleRailMode() {
             this.isRailMode = !this.isRailMode
-            // Guardar preferencia
             localStorage.setItem('railMode', this.isRailMode.toString())
         },
 
-        async checkAllServices(silent = false) {
+        // 🔧 OPTIMIZADO CON CACHE Y MEJOR CONTROL
+        async checkAllServices(silent = false, forceRefresh = false) {
+            // Prevenir múltiples llamadas simultáneas
+            if (this.loadingServices) {
+                console.log('🔧 [AppLayout] Verificación ya en curso, saltando...')
+                return
+            }
+
             this.loadingServices = true
+            this.lastCheckTime = Date.now()
+
             try {
-                const health = await checkAllServicesHealth()
+                console.log(`🏥 [AppLayout] Verificando servicios (silent: ${silent}, force: ${forceRefresh})`)
 
-                // Actualizar estado
-                Object.keys(health).forEach(service => {
-                    this.servicesStatus[service] = health[service].status
-                })
+                // Usar la función optimizada con cache
+                const health = await checkAllServicesHealth(forceRefresh)
 
+                // 🔧 ACTUALIZACIÓN OPTIMIZADA
+                const docgenStatus = health.docgen?.status || 'offline'
+                const statusChanged = this.servicesStatus.docgen !== docgenStatus
+
+                if (statusChanged) {
+                    console.log(`🔄 [AppLayout] Estado cambió: ${this.servicesStatus.docgen} → ${docgenStatus}`)
+                    this.servicesStatus.docgen = docgenStatus
+                }
+
+                // 🔧 NOTIFICACIONES INTELIGENTES
                 if (!silent) {
-                    console.log('🔍 Estado de servicios:', health)
-
-                    // Notificar servicios offline
-                    const offlineServices = Object.entries(health)
-                        .filter(([_, healthInfo]) => healthInfo.status !== 'online')
-                        .map(([name]) => name)
-
-                    if (offlineServices.length > 0) {
-                        this.showGlobalNotification({
-                            title: 'Servicios Offline',
-                            message: `${offlineServices.join(', ')} no están disponibles`,
-                            color: 'warning',
-                            icon: 'mdi-alert'
-                        })
+                    if (statusChanged) {
+                        // Solo notificar si cambió el estado
+                        if (docgenStatus === 'online') {
+                            this.showGlobalNotification({
+                                title: 'Servicio Restaurado',
+                                message: 'DocGen está funcionando correctamente',
+                                color: 'success',
+                                icon: 'mdi-check-circle'
+                            })
+                        } else {
+                            this.showGlobalNotification({
+                                title: 'Servicio Offline',
+                                message: 'DocGen no está disponible',
+                                color: 'error',
+                                icon: 'mdi-alert'
+                            })
+                        }
                     } else {
+                        // Estado sin cambios
                         this.showGlobalNotification({
-                            title: 'Servicios Online',
-                            message: 'Todos los servicios están funcionando correctamente',
-                            color: 'success',
-                            icon: 'mdi-check-circle'
+                            title: 'Verificación Completa',
+                            message: `DocGen: ${docgenStatus}`,
+                            color: docgenStatus === 'online' ? 'success' : 'warning',
+                            icon: 'mdi-information',
+                            timeout: 2000
                         })
                     }
                 }
 
             } catch (error) {
-                console.error('Error verificando servicios:', error)
+                console.error('❌ [AppLayout] Error verificando servicios:', error)
+
+                if (this.servicesStatus.docgen !== 'error') {
+                    this.servicesStatus.docgen = 'error'
+                }
+
                 if (!silent) {
                     this.showGlobalNotification({
                         title: 'Error de Conexión',
@@ -401,23 +473,30 @@ export default {
         },
 
         restoreUserPreferences() {
-            // Restaurar rail mode
             const savedRailMode = localStorage.getItem('railMode')
             if (savedRailMode !== null) {
                 this.isRailMode = savedRailMode === 'true'
             }
 
-            // Restaurar drawer state
             const savedDrawer = localStorage.getItem('drawerOpen')
             if (savedDrawer !== null) {
                 this.drawer = savedDrawer === 'true'
             }
-        }
-    },
+        },
 
-    beforeUnmount() {
-        // Limpiar listener
-        window.removeEventListener('resize', this.checkMobile)
+        // 🔧 CLEANUP MEJORADO
+        cleanup() {
+            console.log('🧹 [AppLayout] Limpiando recursos...')
+
+            if (this.autoCheckInterval) {
+                clearInterval(this.autoCheckInterval)
+                this.autoCheckInterval = null
+            }
+
+            window.removeEventListener('resize', this.checkMobile)
+
+            console.log('✅ [AppLayout] Recursos limpiados')
+        }
     }
 }
 </script>
@@ -444,9 +523,15 @@ export default {
     border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
+/* 🔧 OPTIMIZACIÓN: Evitar animaciones innecesarias en desarrollo */
 @media (max-width: 960px) {
     .v-navigation-drawer {
         position: fixed !important;
     }
+}
+
+/* Reducir re-paints en chips */
+.v-chip {
+    will-change: auto;
 }
 </style>
