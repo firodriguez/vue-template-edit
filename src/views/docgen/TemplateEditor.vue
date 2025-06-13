@@ -1,6 +1,6 @@
 <!-- src/views/docgen/TemplateEditor.vue - VERSIÓN LIMPIA -->
 <template>
-    <v-container fluid class="pa-6">
+    <v-container fluid class="pa-6" style="height: 100vh; overflow-y: auto;">
         <!-- ================================ -->
         <!-- HEADER SIMPLE (como DocGenDashboard) -->
         <!-- ================================ -->
@@ -15,6 +15,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- ALERT DINÁMICO PARA ERRORES IMPORTANTES -->
+        <v-alert v-if="statusAlert.show" :type="statusAlert.type" variant="tonal" class="mb-6" closable
+            @click:close="statusAlert.show = false">
+            <div class="d-flex align-center">
+                <strong>{{ statusAlert.title }}</strong>
+                <div v-if="statusAlert.message" class="ml-2 text-caption">{{ statusAlert.message }}</div>
+            </div>
+        </v-alert>
 
         <!-- ================================ -->
         <!-- CONTENIDO PRINCIPAL EN CARDS -->
@@ -194,15 +203,6 @@
                             </div>
                         </div>
                     </v-card-text>
-
-                    <!-- Botón de Preview en footer -->
-                    <!-- <v-card-actions class="pa-4">
-                        <v-btn color="orange" block @click="generatePreview" :loading="loadingPreview"
-                            :disabled="!selectedTemplate || isShowingExample" size="large">
-                            <v-icon left>mdi-eye</v-icon>
-                            Actualizar Preview
-                        </v-btn>
-                    </v-card-actions> -->
                 </v-card>
             </v-col>
 
@@ -247,7 +247,7 @@
                     </v-card-title>
 
                     <!-- Contenido del Preview -->
-                    <v-card-text class="pa-0" style="height: calc(100vh - 300px);">
+                    <v-card-text class="pa-0" style="height: calc(100vh - 250px); overflow-y: auto;">
                         <!-- Vista Renderizada -->
                         <div v-if="previewMode === 'rendered'" class="preview-container">
                             <div v-if="!previewHTML" class="no-preview">
@@ -346,6 +346,15 @@ export default {
                 show: false,
                 message: '',
                 color: 'success'
+            },
+            // Alert de arriba para errores importantes
+            statusAlert: {
+                show: false,
+                type: 'error',
+                title: '',
+                message: '',
+                icon: 'mdi-alert-circle',
+                closable: true
             }
         }
     },
@@ -683,10 +692,33 @@ export default {
         },
 
         showMessage(message, color = 'info') {
+            // Mantener el snackbar como siempre
             this.snackbar = {
                 show: true,
                 message,
                 color
+            }
+
+            // ADEMÁS mostrar en el alert de arriba si es error importante
+            const isImportantError = (
+                color === 'error' &&
+                (message.includes('403') ||
+                    message.includes('401') ||
+                    message.includes('token') ||
+                    message.includes('Token') ||
+                    message.includes('conexión'))
+            )
+
+            if (isImportantError) {
+                // También mostrar en el alert de arriba
+                this.statusAlert = {
+                    show: true,
+                    type: 'error',
+                    title: message,
+                    message: '',
+                    icon: 'mdi-alert-circle',
+                    closable: true
+                }
             }
         },
 

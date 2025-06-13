@@ -191,7 +191,7 @@ export default {
             // 🔧 Control de auto-verificación MEJORADO
             autoCheckInterval: null,
             lastCheckTime: 0,
-            AUTO_CHECK_COOLDOWN: 5 * 60 * 1000, // 5 minutos
+            AUTO_CHECK_COOLDOWN: 3 * 60 * 1000, // 3 minutos
             MANUAL_CHECK_COOLDOWN: 2000, // 2 segundos para verificación manual
 
             // Notificaciones globales
@@ -315,7 +315,7 @@ export default {
                         message: 'DocGen no está disponible',
                         color: 'warning',
                         icon: 'mdi-alert',
-                        timeout: 6000 // Más tiempo para ver la advertencia
+                        timeout: 10000 // Más tiempo para ver la advertencia
                     })
                 }
 
@@ -340,6 +340,7 @@ export default {
                 await this.checkAllServices(true) // Siempre silencioso en auto-check
             }, this.AUTO_CHECK_COOLDOWN)
         },
+        
 
         // 🔧 MÉTODO PARA VERIFICACIÓN MANUAL CON MEJOR CONTROL
         async manualCheckServices() {

@@ -61,7 +61,7 @@ class BaseApiService {
                 errorInfo.friendlyMessage = 'Error interno del servidor'
                 break
             case 403:
-                errorInfo.friendlyMessage = 'Sin permisos para acceder'
+                errorInfo.friendlyMessage = 'Sin permisos para acceder token'
                 break
             case 401:
                 errorInfo.friendlyMessage = 'No autorizado'

@@ -10,7 +10,7 @@ class HealthCheckManager {
     constructor() {
         this.cache = new Map()
         this.pendingChecks = new Map()
-        this.CACHE_DURATION = 30 * 1000 // 30 segundos
+        this.CACHE_DURATION = 10 * 1000 // 30 segundos
     }
 
     /**
@@ -148,7 +148,7 @@ export const API_CONFIG = {
     DOCGEN: {
         name: 'docgen-service',
         baseURL: 'https://generate.surfrut.com',
-        timeout: 15000,
+        timeout: 3,
         defaultToken: APP_CONSTANTS.DOCGEN_TOKEN
     }
     // Aquí puedes agregar más APIs fácilmente
@@ -257,17 +257,4 @@ export default {
 
     // Health Manager (para casos avanzados)
     healthManager
-}
-
-// ================================
-// HACER DISPONIBLE EN WINDOW PARA DEBUGGING
-// ================================
-if (import.meta.env.DEV) {
-    window.__API_HEALTH_CACHE__ = healthManager
-    window.__API_SERVICES__ = {
-        docgen: docGenService,
-        checkHealth: checkAllServicesHealth,
-        clearCache: clearHealthCache,
-        getCacheStatus
-    }
 }
