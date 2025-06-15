@@ -9,7 +9,7 @@ class BaseApiService {
                 'Content-Type': 'application/json',
                 ...config.headers
             },
-            timeout: config.timeout || 15000,
+            timeout: config.timeout || 5000,
             ...config
         })
 

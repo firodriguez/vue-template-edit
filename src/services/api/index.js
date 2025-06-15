@@ -148,7 +148,7 @@ export const API_CONFIG = {
     DOCGEN: {
         name: 'docgen-service',
         baseURL: 'https://generate.surfrut.com',
-        timeout: 3,
+        timeout: 5000,
         defaultToken: APP_CONSTANTS.DOCGEN_TOKEN
     }
     // Aquí puedes agregar más APIs fácilmente

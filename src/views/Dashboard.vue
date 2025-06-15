@@ -1,4 +1,4 @@
-<!-- src/views/Dashboard.vue - DASHBOARD PRINCIPAL -->
+<!-- src/views/Dashboard.vue - CON ESTADO GLOBAL -->
 <template>
   <v-container fluid class="pa-6">
     <v-row>
@@ -32,11 +32,13 @@
               </div>
             </div>
 
-            <v-chip :color="servicesStatus.docgen === 'online' ? 'success' : 'error'" size="small" class="mb-4">
+            <!-- 🔧 USANDO EL STORE GLOBAL -->
+            <v-chip :color="servicesStore.getServiceStatus('docgen') === 'online' ? 'success' : 'error'" size="small"
+              class="mb-4">
               <v-icon left size="small">
-                {{ servicesStatus.docgen === 'online' ? 'mdi-check' : 'mdi-close' }}
+                {{ servicesStore.getServiceStatus('docgen') === 'online' ? 'mdi-check' : 'mdi-close' }}
               </v-icon>
-              {{ servicesStatus.docgen === 'online' ? 'Online' : 'Offline' }}
+              {{ servicesStore.getServiceStatus('docgen') === 'online' ? 'Online' : 'Offline' }}
             </v-chip>
 
             <div class="d-flex flex-column ga-2">
@@ -117,14 +119,15 @@
       </v-col>
     </v-row>
 
-    <!-- ACCESOS RÁPIDOS -->
+    <!-- INFORMACIÓN DEL SISTEMA CON ESTADO GLOBAL -->
     <v-row class="mt-8">
       <v-col cols="12">
         <h2 class="text-h5 font-weight-bold mb-4">
           <v-icon left color="primary">mdi-lightning-bolt</v-icon>
-          Informacion
+          Información
         </h2>
       </v-col>
+
       <v-col cols="12" md="4">
         <v-card elevation="1" color="blue-lighten-5">
           <v-card-text class="pa-6">
@@ -149,27 +152,74 @@
           </v-card-text>
         </v-card>
       </v-col>
+
+      <!-- 🔧 NUEVA CARD: ESTADO DE SERVICIOS EN TIEMPO REAL -->
+      <v-col cols="12" md="4">
+        <v-card elevation="1"
+          :color="servicesStore.getServiceStatus('docgen') === 'online' ? 'green-lighten-5' : 'red-lighten-5'">
+          <v-card-text class="pa-6">
+            <h3 class="text-h6 mb-3">
+              <v-icon left :color="servicesStore.getServiceStatus('docgen') === 'online' ? 'green' : 'red'">
+                mdi-server-network
+              </v-icon>
+              Estado de Servicios
+            </h3>
+
+            <div class="d-flex justify-space-between mb-2">
+              <span>DocGen API:</span>
+              <v-chip :color="servicesStore.getServiceStatus('docgen') === 'online' ? 'success' : 'error'" size="small">
+                <v-icon left size="small">
+                  {{ servicesStore.getServiceStatus('docgen') === 'online' ? 'mdi-check' : 'mdi-close' }}
+                </v-icon>
+                {{ servicesStore.getServiceStatus('docgen') === 'online' ? 'Online' : 'Offline' }}
+              </v-chip>
+            </div>
+
+            <div class="d-flex justify-space-between mb-3">
+              <span>Última verificación:</span>
+              <span class="text-caption">{{ formatLastCheck() }}</span>
+            </div>
+
+            <!-- BOTÓN PARA VERIFICAR DESDE EL DASHBOARD -->
+            <v-btn color="primary" variant="tonal" size="small" @click="refreshServicesStatus"
+              :loading="servicesStore.isLoading()" block>
+              <v-icon left size="small">mdi-refresh</v-icon>
+              Verificar Estado
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import { checkAllServicesHealth } from '@/services/api/index.js'
+import { useServicesStore } from '@/stores/servicesStore.js'
 
 export default {
   name: 'Dashboard',
 
+  setup() {
+    // 🔧 USAR EL STORE GLOBAL
+    const servicesStore = useServicesStore()
+    return { servicesStore }
+  },
+
   data() {
     return {
-      servicesStatus: {
-        docgen: 'unknown'
-      },
       appInfo: {
         version: '1.0.0',
-        vueVersion: '3.5.13', // O puedes obtenerla dinámicamente
+        vueVersion: '3.5.13',
         isDev: import.meta.env.DEV,
         date: this.mostrarFechayhora()
       }
+    }
+  },
+
+  computed: {
+    // 🔧 COMPUTED REACTIVO USANDO EL STORE
+    servicesSummary() {
+      return this.servicesStore.getServicesSummary()
     }
   },
 
@@ -180,13 +230,51 @@ export default {
   methods: {
     async loadDashboardData() {
       try {
-        // Verificar estado de servicios
-        const health = await checkAllServicesHealth()
-        this.servicesStatus.docgen = health.docgen?.status || 'offline'
+        console.log('📊 [Dashboard] Cargando datos usando store global...')
+
+        // El store ya maneja el estado, solo verificamos si es necesario
+        const lastCheck = this.servicesStore.getLastCheckTime()
+        const timeSinceLastCheck = Date.now() - lastCheck
+
+        // Si hace más de 1 minuto que no se verifica, hacer check
+        if (timeSinceLastCheck > 60000) {
+          await this.servicesStore.checkAllServices()
+        }
+
+        console.log('✅ [Dashboard] Datos cargados:', this.servicesStore.getAllServices())
 
       } catch (error) {
-        console.error('Error cargando datos del dashboard:', error)
+        console.error('❌ [Dashboard] Error cargando datos:', error)
       }
+    },
+
+    // 🔧 MÉTODO PARA VERIFICAR DESDE EL DASHBOARD
+    async refreshServicesStatus() {
+      try {
+        console.log('🔄 [Dashboard] Verificación manual solicitada')
+        await this.servicesStore.checkAllServices(true) // Forzar refresh
+
+        // Opcional: mostrar notificación de éxito
+        console.log('✅ [Dashboard] Estado actualizado')
+      } catch (error) {
+        console.error('❌ [Dashboard] Error actualizando estado:', error)
+      }
+    },
+
+    formatLastCheck() {
+      const lastCheck = this.servicesStore.getLastCheckTime()
+      if (!lastCheck) return 'Nunca'
+
+      const now = Date.now()
+      const diff = now - lastCheck
+
+      if (diff < 60000) return 'Hace menos de 1 min'
+      if (diff < 3600000) return `Hace ${Math.floor(diff / 60000)} min`
+
+      return new Date(lastCheck).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     },
 
     mostrarFechayhora() {
